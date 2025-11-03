@@ -13,7 +13,10 @@ struct ContentView: View {
     @State private var enteredweight: Double = 0.0 // TextFieldに入力した体重の変数
     @State private var originalUnit = "meter" // 元(換算する前)の単位を格納する変数
     
+    @FocusState private var isFocused: Bool // フォーカスされているかの変数
+    
     let lengthUnits = ["meter", "centimeter"] // 長さの単位一覧
+    
     private var convertedNumber: Double = 0 // 換算後の数値。
     
     var body: some View {
@@ -22,8 +25,21 @@ struct ContentView: View {
                 Section("入力"){
                     HStack{
                         TextField("Original", value: $enteredheight, format: .number)
-                            .keyboardType(.numberPad)
+                            .keyboardType(.decimalPad)//.decimalPadで小数を入力できる
                             .padding()
+                            .focused($isFocused)
+                            .toolbar {
+                                ToolbarItem(placement: .keyboard) {
+                                    HStack{
+                                        Spacer()
+                                        Button {
+                                            isFocused = false
+                                        } label: {
+                                        Text("Done")
+                                        }
+                                    }
+                                }
+                            }
                         
                         Picker("", selection: $originalUnit) {
                             ForEach(lengthUnits, id: \.self) { unit in
@@ -33,8 +49,9 @@ struct ContentView: View {
                     }
                     HStack{
                         TextField("Original", value: $enteredweight, format: .number)
-                            .keyboardType(.numberPad)
+                            .keyboardType(.decimalPad)
                             .padding()
+                            .focused($isFocused)
                         
                         Text("kg")
                     }
@@ -45,9 +62,19 @@ struct ContentView: View {
                                              height: lengthConversion(
                                                 oldUnit: originalUnit,
                                                 newUnit: "meter",
-                                                value: enteredheight)), format: .number)
+                                                value: enteredheight)), format: .number.precision(.fractionLength(2)))// 小数第2位まで表示
                     }
                     
+                }
+                
+                Section("あなたの肥満度チェック"){
+                    HStack{
+                        Text(bmiCategory(bmiValue: bmiCaluculation(weight: enteredweight,
+                                                                   height: lengthConversion(
+                                                                      oldUnit: originalUnit,
+                                                                      newUnit: "meter",
+                                                                      value: enteredheight))))
+                    }
                 }
                 .navigationTitle("BMI計算機")  // 画面上部にタイトルを付ける
                 
@@ -88,6 +115,22 @@ struct ContentView: View {
     
     func bmiCaluculation(weight: Double, height: Double) -> Double {
         return weight / (height * height)
+    }
+    
+    func bmiCategory(bmiValue: Double) -> String {
+        //guard bmiValue.isFiniteで普通の数（有限の値か？）をチェック
+        guard bmiValue.isFinite, bmiValue > 0 else { return "NaN" }
+        
+        switch bmiValue {
+        case ..<18.5:
+            return "痩せすぎ"
+        case 18.5..<24.9:
+            return "標準"
+        case 25...:
+            return "肥満"
+        default:
+            return ""
+        }
     }
 }
 
