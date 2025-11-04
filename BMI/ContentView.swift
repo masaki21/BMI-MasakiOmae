@@ -119,7 +119,7 @@ struct ContentView: View {
     
     func bmiCategory(bmiValue: Double) -> String {
         //guard bmiValue.isFiniteで普通の数（有限の値か？）をチェック
-        guard bmiValue.isFinite, bmiValue > 0 else { return "NaN" }
+        guard bmiValue.isFinite, bmiValue > 0 else { return "" }
         
         switch bmiValue {
         case ..<18.5:
