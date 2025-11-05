@@ -21,63 +21,72 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack {
-            Form {
-                Section("入力"){
-                    HStack{
-                        TextField("Original", value: $enteredheight, format: .number)
-                            .keyboardType(.decimalPad)//.decimalPadで小数を入力できる
-                            .padding()
-                            .focused($isFocused)
-                            .toolbar {
-                                ToolbarItem(placement: .keyboard) {
-                                    HStack{
-                                        Spacer()
-                                        Button {
-                                            isFocused = false
-                                        } label: {
-                                        Text("Done")
+            
+            ZStack { //Zstackで囲って背景に色をつける
+                Color.cyan.opacity(0.2).ignoresSafeArea() //opacityで透明度を追加
+                
+                
+                Form {
+                    Section("入力"){
+                        HStack{
+                            TextField("Original", value: $enteredheight, format: .number)
+                                .keyboardType(.decimalPad)//.decimalPadで小数を入力できる
+                                .padding()
+                                .focused($isFocused)
+                                .toolbar {
+                                    ToolbarItem(placement: .keyboard) {
+                                        HStack{
+                                            Spacer()
+                                            Button {
+                                                isFocused = false
+                                            } label: {
+                                                Text("Done")
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        
-                        Picker("", selection: $originalUnit) {
-                            ForEach(lengthUnits, id: \.self) { unit in
-                                Text(unit)
+                            
+                            Picker("", selection: $originalUnit) {
+                                ForEach(lengthUnits, id: \.self) { unit in
+                                    Text(unit)
+                                }
                             }
                         }
+                        HStack{
+                            TextField("Original", value: $enteredweight, format: .number)
+                                .keyboardType(.decimalPad)
+                                .padding()
+                                .focused($isFocused)
+                            
+                            Text("kg")
+                        }
                     }
-                    HStack{
-                        TextField("Original", value: $enteredweight, format: .number)
-                            .keyboardType(.decimalPad)
-                            .padding()
-                            .focused($isFocused)
+                    Section("結果"){
+                        HStack{
+                            Text(bmiCaluculation(weight: enteredweight,
+                                                 height: lengthConversion(
+                                                    oldUnit: originalUnit,
+                                                    newUnit: "meter",
+                                                    value: enteredheight)), format: .number.precision(.fractionLength(2)))// 小数第2位まで表示
+                        }
                         
-                        Text("kg")
-                    }
-                }
-                Section("結果"){
-                    HStack{
-                        Text(bmiCaluculation(weight: enteredweight,
-                                             height: lengthConversion(
-                                                oldUnit: originalUnit,
-                                                newUnit: "meter",
-                                                value: enteredheight)), format: .number.precision(.fractionLength(2)))// 小数第2位まで表示
                     }
                     
-                }
-                
-                Section("あなたの肥満度チェック"){
-                    HStack{
-                        Text(bmiCategory(bmiValue: bmiCaluculation(weight: enteredweight,
-                                                                   height: lengthConversion(
-                                                                      oldUnit: originalUnit,
-                                                                      newUnit: "meter",
-                                                                      value: enteredheight))))
+                    Section("あなたの肥満度チェック"){
+                        HStack{
+                            Text(bmiCategory(bmiValue: bmiCaluculation(weight: enteredweight,
+                                                                       height: lengthConversion(
+                                                                        oldUnit: originalUnit,
+                                                                        newUnit: "meter",
+                                                                        value: enteredheight))))
+                        }
                     }
+                    .navigationTitle("BMI計算機")  // 画面上部にタイトルを付ける
+                    //navigationBarの背景色を変更
+                    .toolbarBackground(Color.cyan.opacity(0.5), for: .navigationBar)
+                    .toolbarBackground(.visible, for: .navigationBar)//navigationBarが常に見える状態に固定する指定
                 }
-                .navigationTitle("BMI計算機")  // 画面上部にタイトルを付ける
-                
+                .scrollContentBackground(.hidden) // ← Form の標準背景を消す
             }
         }
     }
